@@ -1,9 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
+import axios from 'axios';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store from './store';
+
+axios.defaults.baseURL = 'https://7dev-code-test.lcc7.online/api/v1';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

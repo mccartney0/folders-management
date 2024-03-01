@@ -2,41 +2,59 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logIn, useAuth } from '../../store/auth';
+import axios from 'axios';
 
 function LoginForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(useAuth);
 
-  const redirectToHome = () => {
-    navigate('/home');
-  };
-
+  const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
-  const handleLogIn = () => {
+  const handleLogIn = async () => {
     if (formData.username.trim() !== '' && formData.password.trim() !== '') {
-      dispatch(logIn({
-        username: formData.username,
-        password: formData.password,
-        token: '45C4A5451321B4C88F',
-      }));
+      try {
+        setLoading(true);
+        setErrorMessage('');
 
-      redirectToHome();
+        const { data } = await axios.post('/token', {
+          username: formData.username,
+          password: formData.password,
+        });
+
+        const token = data.access;
+
+        dispatch(logIn({
+          username: formData.username,
+          password: formData.password,
+        }));
+
+        localStorage.setItem('token', token);
+
+        // Redireciona para a página de home após o login
+        navigate('/home');
+      } catch (error) {
+        setErrorMessage('Invalid username or password.');
+        console.error('Error logging in:', error);
+      } finally {
+        setLoading(false);
+      }
     } else {
       alert('Please fill in all required fields.');
     }
   };
 
   return (
-    <div className="d-flex align-items-center flex-column">
-      <h2>Login</h2>
+    <div className="d-flex align-items-center flex-column p-10">
+      <h1>Login</h1>
 
-      <div className="mb-3">
+      <div className="d-grid col-3 my-3">
         <label
           htmlFor="username"
           className="form-label"
@@ -48,14 +66,13 @@ function LoginForm() {
           type="text"
           id="username"
           name="username"
-          value={formData.username}
+          className="form-control mb-3"
+          disabled={loading}
           onChange={handleChange}
-          className="form-control"
+          value={formData.username}
           placeholder={user.username}
         />
-      </div>
 
-      <div className="mb-3">
         <label
           htmlFor="password"
           className="form-label"
@@ -67,18 +84,24 @@ function LoginForm() {
           type="password"
           id="password"
           name="password"
-          value={formData.password}
-          onChange={handleChange}
           className="form-control"
+          disabled={loading}
+          onChange={handleChange}
+          value={formData.password}
         />
-      </div>
 
-      <div className="mb-3">
+        {
+          errorMessage &&
+          <div className="text-red-600">
+            {errorMessage}
+          </div>
+        }
+
         <button
           onClick={handleLogIn}
-          className="btn btn-primary"
+          className="btn btn-primary mt-3"
         >
-          Log in
+          {loading ? 'Logging in...' : 'Log in'}
         </button>
       </div>
     </div>
