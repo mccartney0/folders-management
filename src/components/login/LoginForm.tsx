@@ -100,6 +100,7 @@ function LoginForm() {
         <button
           onClick={handleLogIn}
           className="btn btn-primary mt-3"
+          disabled={loading}
         >
           {loading ? 'Logging in...' : 'Log in'}
         </button>
