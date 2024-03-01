@@ -1,12 +1,20 @@
 import { Routes, Route } from 'react-router-dom';
-
 import Home from './pages/Home';
+import Login from './pages/Login';
+import PrivateRoute from './components/PrivateRoute';
 
 const MainRoutes = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-    </Routes>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Private route using PrivateRoute component */}
+        <Route path="/" element={<PrivateRoute />}>
+          <Route path="" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+        </Route>
+      </Routes>
   );
 };
 
