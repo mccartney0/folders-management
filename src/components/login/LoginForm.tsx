@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logIn, useAuth } from '../../store/auth';
-import axios from 'axios';
 
 function LoginForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(useAuth);
+  const isLoginSuccess = user.token;
 
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -33,12 +34,8 @@ function LoginForm() {
         dispatch(logIn({
           username: formData.username,
           password: formData.password,
+          token,
         }));
-
-        localStorage.setItem('token', token);
-
-        // Redireciona para a página de home após o login
-        navigate('/home');
       } catch (error) {
         setErrorMessage('Invalid username or password.');
         console.error('Error logging in:', error);
@@ -50,8 +47,14 @@ function LoginForm() {
     }
   };
 
+  useEffect(() => {
+    if (isLoginSuccess) {
+      navigate('/home');
+    }
+  }, [isLoginSuccess, navigate])
+
   return (
-    <div className="d-flex align-items-center flex-column p-10">
+    <section className="d-flex align-items-center flex-column p-10">
       <h1>Login</h1>
 
       <div className="d-grid col-3 my-3">
@@ -105,7 +108,7 @@ function LoginForm() {
           {loading ? 'Logging in...' : 'Log in'}
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 
