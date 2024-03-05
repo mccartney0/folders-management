@@ -23,7 +23,12 @@ const SideBarDirectoryTree = ({ directory, directories }: { directory: Directory
         className="ml-1.5 d-flex cursor-pointer hover:bg-sky-700"
       >
         <span className="directory-icon">{expanded ? "📂" : "📁"}</span>
-        <span className="directory-name overflow-hidden	text-ellipsis">{directory.name}</span>
+        <span
+          className="directory-name overflow-hidden	text-ellipsis max-w-sm whitespace-nowrap"
+          title={directory.name}
+        >
+          {directory.name}
+          </span>
       </div>
 
       <div

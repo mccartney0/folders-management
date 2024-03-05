@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from '../store';
 import { setActive } from '../store/context-menu';
@@ -13,6 +13,18 @@ interface ContextMenuProps {
 const ContextMenu = ({ x, y, onRename, onDelete }: ContextMenuProps) => {
   const dispatch = useDispatch();
   const isActive = useSelector((state: RootState) => state.contextMenu.isActive);
+
+  useEffect(() => {
+    const closeContextMenu = () => {
+      dispatch(setActive(false));
+    };
+
+    document.addEventListener("click", closeContextMenu);
+
+    return () => {
+      document.removeEventListener("click", closeContextMenu);
+    };
+  }, [dispatch]);
 
   const handleClose = () => {
     dispatch(setActive(false));
@@ -35,7 +47,7 @@ const ContextMenu = ({ x, y, onRename, onDelete }: ContextMenuProps) => {
   if (!isActive) return null;
 
   return (
-    <div style={{ left: x, top: y }} onContextMenu={handleRightClick} className='absolute bg-white p-2 rounded shadow-lg shadow-indigo-500/40'>
+    <div style={{ left: x, top: y }} onContextMenu={handleRightClick} className='absolute bg-white p-2 rounded shadow-sm shadow-indigo-500/40'>
       <div className="close-btn d-flex justify-content-end">
         <button onClick={handleClose} className='btn btn-close'></button>
       </div>
