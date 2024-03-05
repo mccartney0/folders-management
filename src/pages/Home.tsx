@@ -1,8 +1,12 @@
-const Home = () => {
+import Layout from '../components/layout/Layout';
+
+function Home() {
   return (
-    <main>
-      Home
-    </main>
+    <Layout>
+      <main>
+        Home
+      </main>
+    </Layout>
   );
 };
 
