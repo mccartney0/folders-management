@@ -11,7 +11,7 @@ const Navbar = () => {
     <nav className="bg-dark text-white">
       <div className="flex justify-between">
         <Link className="p-3" to={'/home'}>
-          <span>Folder Management System</span>
+          <span>Directory Management System</span>
         </Link>
 
         {
