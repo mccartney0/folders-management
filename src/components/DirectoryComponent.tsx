@@ -1,26 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../store/auth";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import FolderPlusIcon from './icons/folder-plus.svg';
-// import useRefreshToken from "../hooks/useRefreshToken";
-
-interface Directory {
-  id: number;
-  user: string;
-  name: string;
-  parent: number | null;
-}
+import { Directory } from "../types/types";
+import FolderPlusIcon from "./icons/folder-plus.svg";
+import LoadIcon from "./icons/load.svg";
+import { setDirectories } from "../store/directories";
+import { RootState } from "../store";
+import useRefreshToken from "../hooks/useRefreshToken";
 
 const DirectoryComponent = () => {
   const axiosPrivate = useAxiosPrivate();
   const [loading, setLoading] = useState<boolean>(false);
-  const [directories, setDirectories] = useState<Directory[]>([]);
   const { token } = useSelector(useAuth);
   const { id } = useParams();
   const { pathname } = useLocation();
-  // const refresh = useRefreshToken();
+  const directories = useSelector(
+    (state: RootState) => state.directories.directories
+  );
+  const dispatch = useDispatch();
+  const refresh = useRefreshToken();
   const navigate = useNavigate();
   let filteredDirectories = directories;
 
@@ -32,12 +32,12 @@ const DirectoryComponent = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setDirectories(response.data);
+      dispatch(setDirectories(response.data));
       setLoading(false);
     } catch (error) {
       console.error(error);
     }
-  }, [axiosPrivate, setLoading, setDirectories, token]);
+  }, [axiosPrivate, setLoading, dispatch, token]);
 
   useEffect(() => {
     fetchDirectories();
@@ -136,43 +136,58 @@ const DirectoryComponent = () => {
   }
 
   return (
-    <div>
-      <h2>Directories:</h2>
-      {/* <button onClick={refresh} className="btn btn-warning">REFRESH</button> */}
+    <div className="wrapper-directory-component">
+      <div className="new-folder-and-refresh-token d-flex justify-content-between">
+        <button
+          className="btn btn-success d-flex align-items-center gap-2"
+          onClick={handleCreateDirectory}
+        >
+          <img src={FolderPlusIcon} alt="New folder icon" />
 
-    <div className="new">
-      <button
-        className="btn btn-success d-flex align-items-center gap-2"
-        onClick={handleCreateDirectory}
-        disabled={loading}
-      >
-        <img
-          src={FolderPlusIcon}
-          alt="New folder icon"
-        />
+          <span>New Directory</span>
+        </button>
 
-        <span>New Directory</span>
-      </button>
-    </div>
+        <button
+          onClick={refresh}
+          className="btn btn-warning"
+          disabled={!loading}
+        >
+          <img src={LoadIcon} alt="Refresh button" />
+        </button>
+      </div>
 
       {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="wrapper-folders-container">
+        <div className="d-flex justify-content-center align-items-center mt-16">
+          <div>Loading...</div>
+        </div>
+        ) : (
+        <div className="wrapper-folders-container my-16">
+          <h2 className="fs-5">Directories:</h2>
+
           {filteredDirectories.map((directory) => (
-            <div key={directory.id}>
+            <div key={directory.id} className="d-flex justify-content-between">
               <span
                 onClick={() => handleOpenDirectory(directory.id)}
                 style={{ cursor: "pointer", textDecoration: "underline" }}
               >
                 {directory.name}
               </span>
-              <button onClick={() => handleDeleteDirectory(directory.id)}>
-                Delete
-              </button>
-              <button onClick={() => handleUpdateDirectory(directory.id)}>
-                Update
-              </button>
+
+              <div className="actions btn-group">
+                <button
+                  onClick={() => handleUpdateDirectory(directory.id)}
+                  className="btn btn-primary icon"
+                >
+                  Rename
+                </button>
+
+                <button
+                  onClick={() => handleDeleteDirectory(directory.id)}
+                  className="btn btn-danger"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
