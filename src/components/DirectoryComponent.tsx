@@ -5,26 +5,33 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { Directory } from "../types/types";
 import { setDirectories } from "../store/directories";
+import { setActive } from "../store/context-menu";
 import { RootState } from "../store";
 import useRefreshToken from "../hooks/useRefreshToken";
 import directoryPlusIcon from "./icons/directory-plus.svg";
 import LoadIcon from "./icons/load.svg";
 import DirectoryIcon from "./icons/directory.svg";
 import EmptyDirectory from "../assets/empty-directory.jpg";
+import ContextMenu from "./ContextMenu";
 
 const DirectoryComponent = () => {
   const axiosPrivate = useAxiosPrivate();
   const [loading, setLoading] = useState<boolean>(false);
   const [failedRequest, setFailedRequest] = useState<boolean>(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [clickedItemId, setClickedItemId] = useState<number | null>(null);
+
   const { token } = useSelector(useAuth);
   const { id } = useParams();
   const { pathname } = useLocation();
   const directories = useSelector(
     (state: RootState) => state.directories.directories
   );
+
   const dispatch = useDispatch();
   const refresh = useRefreshToken();
   const navigate = useNavigate();
+
   let filteredDirectories = directories;
 
   const fetchDirectories = useCallback(async () => {
@@ -133,6 +140,13 @@ const DirectoryComponent = () => {
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>, id: number): void => {
+    e.preventDefault();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    dispatch(setActive(true));
+    setClickedItemId(id);
+  };
+
   if (pathname === "/home" || pathname === "/home/") {
     filteredDirectories = directories.filter(
       (directory) => directory.parent === null
@@ -181,7 +195,11 @@ const DirectoryComponent = () => {
           <div className="wrapper-directory-container">
             {filteredDirectories.length > 0 ? (
               filteredDirectories.map((directory) => (
-                <div key={directory.id} className="d-flex justify-content-between align-items-center my-3 p-2 rounded hover:bg-slate-100">
+                <div
+                  key={directory.id}
+                  className="d-flex justify-content-between align-items-center my-3 p-2 rounded hover:bg-slate-100"
+                  onContextMenu={(e) => handleContextMenu(e, directory.id)}
+                >
                   <span
                     onClick={() => handleOpenDirectory(directory.id)}
                     className="cursor-pointer hover:underline flex items-center justify-center gap-2"
@@ -189,6 +207,7 @@ const DirectoryComponent = () => {
                     <img src={DirectoryIcon} alt="Directory icon" className="w-10 h-10" />
                     <span className="text-center directory-name overflow-hidden text-ellipsis">{directory.name}</span>
                   </span>
+
                   <div className="actions btn-group">
                     <button
                       onClick={() => handleUpdateDirectory(directory.id)}
@@ -196,6 +215,7 @@ const DirectoryComponent = () => {
                     >
                       Rename
                     </button>
+
                     <button
                       onClick={() => handleDeleteDirectory(directory.id)}
                       className="btn bg-red-500 text-white hover:bg-red-700"
@@ -208,7 +228,9 @@ const DirectoryComponent = () => {
             ) : (
               <div className="d-flex justify-content-center align-items-center flex-column mt-4">
                 <img src={EmptyDirectory} alt="Empty directory" className="w-4/12	grayscale" />
+
                 <span className="mb-6">Empty directory</span>
+
                 <button
                   onClick={handleCreateDirectory}
                   className="btn bg-blue-500 text-white hover:bg-blue-700"
@@ -220,6 +242,13 @@ const DirectoryComponent = () => {
           </div>
         )
       )}
+
+      <ContextMenu
+        x={contextMenuPosition.x}
+        y={contextMenuPosition.y}
+        onRename={() => clickedItemId !== null && handleUpdateDirectory(clickedItemId)}
+        onDelete={() => clickedItemId !== null && handleDeleteDirectory(clickedItemId)}
+      />
     </div>
   );
 };

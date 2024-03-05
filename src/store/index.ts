@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from './auth';
-import directoriesReducer from "./directories";
+import directoriesReducer from './directories';
+import contextMenuReducer from './context-menu';
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     directories: directoriesReducer,
+    contextMenu: contextMenuReducer,
   },
 });
 
