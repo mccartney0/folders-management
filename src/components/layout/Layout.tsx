@@ -7,15 +7,10 @@ type ILayout = {
 
 const Layout = ({ children }: ILayout) => {
 	return (
-		<div>
+		<>
 			<Navbar />
-
-			<div className="container">
-				<div className="row">
-					{children}
-				</div>
-			</div>          
-		</div>
+			{children}
+		</>
 	);
 };
 

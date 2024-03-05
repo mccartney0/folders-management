@@ -8,7 +8,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-body-tertiary">
+    <nav className="bg-dark text-white">
       <div className="flex justify-between">
         <Link className="p-3" to={'/home'}>
           <span>Folder Management System</span>
