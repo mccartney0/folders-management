@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../store/auth";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import FolderPlusIcon from './icons/folder-plus.svg';
+// import useRefreshToken from "../hooks/useRefreshToken";
 
 interface Directory {
   id: number;
@@ -13,11 +14,13 @@ interface Directory {
 }
 
 const DirectoryComponent = () => {
+  const axiosPrivate = useAxiosPrivate();
   const [loading, setLoading] = useState<boolean>(false);
   const [directories, setDirectories] = useState<Directory[]>([]);
   const { token } = useSelector(useAuth);
   const { id } = useParams();
   const { pathname } = useLocation();
+  // const refresh = useRefreshToken();
   const navigate = useNavigate();
   let filteredDirectories = directories;
 
@@ -25,7 +28,7 @@ const DirectoryComponent = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get("/directories", {
+      const response = await axiosPrivate.get("/directories", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -34,7 +37,7 @@ const DirectoryComponent = () => {
     } catch (error) {
       console.error(error);
     }
-  }, [setLoading, setDirectories, token]);
+  }, [axiosPrivate, setLoading, setDirectories, token]);
 
   useEffect(() => {
     fetchDirectories();
@@ -53,7 +56,7 @@ const DirectoryComponent = () => {
         directoryData.parent = parseInt(id);
       }
 
-      await axios.post<Directory>("/directories", directoryData, {
+      await axiosPrivate.post<Directory>("/directories", directoryData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -66,7 +69,7 @@ const DirectoryComponent = () => {
   const updateDirectory = async (id: number, newName: string) => {
     try {
       setLoading(true);
-      await axios.put<Directory>(
+      await axiosPrivate.put<Directory>(
         `/directory/${id}`,
         { name: newName },
         {
@@ -83,7 +86,7 @@ const DirectoryComponent = () => {
   const deleteDirectory = async (id: number) => {
     try {
       setLoading(true);
-      await axios.delete(`/directory/${id}`, {
+      await axiosPrivate.delete(`/directory/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -135,6 +138,7 @@ const DirectoryComponent = () => {
   return (
     <div>
       <h2>Directories:</h2>
+      {/* <button onClick={refresh} className="btn btn-warning">REFRESH</button> */}
 
     <div className="new">
       <button

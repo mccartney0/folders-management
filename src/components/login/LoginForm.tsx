@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "../../api/axios";
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -30,11 +30,13 @@ function LoginForm() {
         });
 
         const token = data.access;
+        const refreshToken = data.refresh;
 
         dispatch(logIn({
           username: formData.username,
           password: formData.password,
           token,
+          refreshToken,
         }));
       } catch (error) {
         setErrorMessage('Invalid username or password.');
