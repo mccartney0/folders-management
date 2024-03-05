@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import PrivateRoute from './components/PrivateRoute';
-// import DirectoryComponent from './components/DirectoryComponent';
 
 const MainRoutes = () => {
   return (
