@@ -1,10 +1,11 @@
 import Layout from '../components/layout/Layout';
+import DirectoryComponent from '../components/DirectoryComponent';
 
 function Home() {
   return (
     <Layout>
       <main>
-        Home
+        <DirectoryComponent />
       </main>
     </Layout>
   );
