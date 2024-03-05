@@ -13,6 +13,7 @@ import LoadIcon from "./icons/load.svg";
 import DirectoryIcon from "./icons/directory.svg";
 import EmptyDirectory from "../assets/empty-directory.jpg";
 import ContextMenu from "./ContextMenu";
+import ArrowLeft from "./icons/arrow-left.svg";
 
 const DirectoryComponent = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -178,7 +179,19 @@ const DirectoryComponent = () => {
         </button>
       </div>
 
-      <h2 className="fs-5 mt-10">Directories:</h2>
+      <div className="directories-header d-flex justify-content-between align-items-center mt-10">
+        <h2 className="fs-5">
+          Directories
+        </h2>
+
+        <button
+          onClick={() => navigate(-1)}
+          className="btn shadow-sm d-flex align-items-center gap-1"
+        >
+          <img src={ArrowLeft} alt="Go back icon button" />
+          <span>Go back</span>
+        </button>
+      </div>
 
       {failedRequest ? (
         <div className="d-flex justify-content-center align-items-center mt-16">
@@ -197,7 +210,7 @@ const DirectoryComponent = () => {
               filteredDirectories.map((directory) => (
                 <div
                   key={directory.id}
-                  className="d-flex justify-content-between align-items-center my-3 p-2 rounded hover:bg-slate-100"
+                  className="d-flex justify-content-between align-items-center my-3 p-2 rounded shadow-sm hover:bg-zinc-100"
                   onContextMenu={(e) => handleContextMenu(e, directory.id)}
                 >
                   <span
@@ -205,20 +218,25 @@ const DirectoryComponent = () => {
                     className="cursor-pointer hover:underline flex items-center justify-center gap-2"
                   >
                     <img src={DirectoryIcon} alt="Directory icon" className="w-10 h-10" />
-                    <span className="text-center directory-name overflow-hidden text-ellipsis">{directory.name}</span>
+                    <span
+                      className="text-center directory-name overflow-hidden text-ellipsis d-block max-w-sm whitespace-nowrap"
+                    title={directory.name}
+                    >
+                      {directory.name}
+                    </span>
                   </span>
 
-                  <div className="actions btn-group">
+                  <div className="actions btn-group shadow-sm">
                     <button
                       onClick={() => handleUpdateDirectory(directory.id)}
-                      className="btn bg-blue-500 text-white hover:bg-blue-700"
+                      className="btn bg-white hover:text-blue-600"
                     >
                       Rename
                     </button>
 
                     <button
                       onClick={() => handleDeleteDirectory(directory.id)}
-                      className="btn bg-red-500 text-white hover:bg-red-700"
+                      className="btn bg-white hover:text-rose-600"
                     >
                       Delete
                     </button>
