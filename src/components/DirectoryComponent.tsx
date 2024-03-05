@@ -13,6 +13,7 @@ import useRefreshToken from "../hooks/useRefreshToken";
 const DirectoryComponent = () => {
   const axiosPrivate = useAxiosPrivate();
   const [loading, setLoading] = useState<boolean>(false);
+  const [failedRequest, setFailedRequest] = useState<boolean>(false);
   const { token } = useSelector(useAuth);
   const { id } = useParams();
   const { pathname } = useLocation();
@@ -27,14 +28,16 @@ const DirectoryComponent = () => {
   const fetchDirectories = useCallback(async () => {
     try {
       setLoading(true);
-
+      
       const response = await axiosPrivate.get("/directories", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       dispatch(setDirectories(response.data));
       setLoading(false);
+      setFailedRequest(false);
     } catch (error) {
+      setFailedRequest(true);
       console.error(error);
     }
   }, [axiosPrivate, setLoading, dispatch, token]);
@@ -149,48 +152,56 @@ const DirectoryComponent = () => {
 
         <button
           onClick={refresh}
-          className="btn btn-warning"
+          className={`btn ${!loading ? 'btn-light' : 'btn-warning'}`}
           disabled={!loading}
         >
           <img src={LoadIcon} alt="Refresh button" />
         </button>
       </div>
 
-      {loading ? (
+      {failedRequest ? (
         <div className="d-flex justify-content-center align-items-center mt-16">
-          <div>Loading...</div>
+          <span className="bg-warning p-2 rounded-md">
+            Please check your internet connection and try again. If the problem persists, contact the support team for further assistance.
+          </span>
         </div>
+      ) : (
+        loading ? (
+          <div className="d-flex justify-content-center align-items-center mt-16">
+            <div>Loading...</div>
+          </div>
         ) : (
-        <div className="wrapper-folders-container my-16">
-          <h2 className="fs-5">Directories:</h2>
+          <div className="wrapper-folders-container my-16">
+            <h2 className="fs-5">Directories:</h2>
 
-          {filteredDirectories.map((directory) => (
-            <div key={directory.id} className="d-flex justify-content-between">
-              <span
-                onClick={() => handleOpenDirectory(directory.id)}
-                style={{ cursor: "pointer", textDecoration: "underline" }}
-              >
-                {directory.name}
-              </span>
-
-              <div className="actions btn-group">
-                <button
-                  onClick={() => handleUpdateDirectory(directory.id)}
-                  className="btn btn-primary icon"
+            {filteredDirectories.map((directory) => (
+              <div key={directory.id} className="d-flex justify-content-between">
+                <span
+                  onClick={() => handleOpenDirectory(directory.id)}
+                  style={{ cursor: "pointer", textDecoration: "underline" }}
                 >
-                  Rename
-                </button>
+                  {directory.name}
+                </span>
 
-                <button
-                  onClick={() => handleDeleteDirectory(directory.id)}
-                  className="btn btn-danger"
-                >
-                  Delete
-                </button>
+                <div className="actions btn-group">
+                  <button
+                    onClick={() => handleUpdateDirectory(directory.id)}
+                    className="btn btn-primary icon"
+                  >
+                    Rename
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteDirectory(directory.id)}
+                    className="btn btn-danger"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
     </div>
   );
