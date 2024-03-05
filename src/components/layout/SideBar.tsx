@@ -12,7 +12,6 @@ const SideBar = ({ children }: ILayout) => {
     (state: RootState) => state.directories.directories
   );
 
-  console.log("REDUX FOLDERS", directories);
   return (
     <div className="wrapper-side-bar">
       <div className="container-fluid">
