@@ -4,11 +4,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { Directory } from "../types/types";
-import FolderPlusIcon from "./icons/folder-plus.svg";
-import LoadIcon from "./icons/load.svg";
 import { setDirectories } from "../store/directories";
 import { RootState } from "../store";
 import useRefreshToken from "../hooks/useRefreshToken";
+import directoryPlusIcon from "./icons/directory-plus.svg";
+import LoadIcon from "./icons/load.svg";
+import DirectoryIcon from "./icons/directory.svg";
+import EmptyDirectory from "../assets/empty-directory.jpg";
 
 const DirectoryComponent = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -36,10 +38,14 @@ const DirectoryComponent = () => {
       dispatch(setDirectories(response.data));
       setLoading(false);
       setFailedRequest(false);
-    } catch (error) {
-      setFailedRequest(true);
-      console.error(error);
+    } catch (error: any) {
+      if (error.response.status === 401) {
+        await refresh();
+      } else {
+        setFailedRequest(true);
+      }
     }
+    // eslint-disable-next-line
   }, [axiosPrivate, setLoading, dispatch, token]);
 
   useEffect(() => {
@@ -140,24 +146,25 @@ const DirectoryComponent = () => {
 
   return (
     <div className="wrapper-directory-component">
-      <div className="new-folder-and-refresh-token d-flex justify-content-between">
+      <div className="new-directory-and-refresh-token d-flex justify-content-between">
         <button
           className="btn btn-success d-flex align-items-center gap-2"
           onClick={handleCreateDirectory}
         >
-          <img src={FolderPlusIcon} alt="New folder icon" />
-
+          <img src={directoryPlusIcon} alt="New directory icon" />
           <span>New Directory</span>
         </button>
 
         <button
           onClick={refresh}
-          className={`btn ${!loading ? 'btn-light' : 'btn-warning'}`}
+          className={`btn ${!loading ? 'd-none btn-light' : 'd-inline btn-warning'}`}
           disabled={!loading}
         >
           <img src={LoadIcon} alt="Refresh button" />
         </button>
       </div>
+
+      <h2 className="fs-5 mt-10">Directories:</h2>
 
       {failedRequest ? (
         <div className="d-flex justify-content-center align-items-center mt-16">
@@ -171,35 +178,45 @@ const DirectoryComponent = () => {
             <div>Loading...</div>
           </div>
         ) : (
-          <div className="wrapper-folders-container my-16">
-            <h2 className="fs-5">Directories:</h2>
-
-            {filteredDirectories.map((directory) => (
-              <div key={directory.id} className="d-flex justify-content-between">
-                <span
-                  onClick={() => handleOpenDirectory(directory.id)}
-                  style={{ cursor: "pointer", textDecoration: "underline" }}
-                >
-                  {directory.name}
-                </span>
-
-                <div className="actions btn-group">
-                  <button
-                    onClick={() => handleUpdateDirectory(directory.id)}
-                    className="btn btn-primary icon"
+          <div className="wrapper-directory-container">
+            {filteredDirectories.length > 0 ? (
+              filteredDirectories.map((directory) => (
+                <div key={directory.id} className="d-flex justify-content-between align-items-center my-3 p-2 rounded hover:bg-slate-100">
+                  <span
+                    onClick={() => handleOpenDirectory(directory.id)}
+                    className="cursor-pointer hover:underline flex items-center justify-center gap-2"
                   >
-                    Rename
-                  </button>
-
-                  <button
-                    onClick={() => handleDeleteDirectory(directory.id)}
-                    className="btn btn-danger"
-                  >
-                    Delete
-                  </button>
+                    <img src={DirectoryIcon} alt="Directory icon" className="w-10 h-10" />
+                    <span className="text-center directory-name overflow-hidden text-ellipsis">{directory.name}</span>
+                  </span>
+                  <div className="actions btn-group">
+                    <button
+                      onClick={() => handleUpdateDirectory(directory.id)}
+                      className="btn bg-blue-500 text-white hover:bg-blue-700"
+                    >
+                      Rename
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDirectory(directory.id)}
+                      className="btn bg-red-500 text-white hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="d-flex justify-content-center align-items-center flex-column mt-4">
+                <img src={EmptyDirectory} alt="Empty directory" className="w-4/12	grayscale" />
+                <span className="mb-6">Empty directory</span>
+                <button
+                  onClick={handleCreateDirectory}
+                  className="btn bg-blue-500 text-white hover:bg-blue-700"
+                >
+                  Add directory
+                </button>
               </div>
-            ))}
+            )}
           </div>
         )
       )}
